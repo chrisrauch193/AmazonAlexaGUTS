@@ -1,12 +1,12 @@
 /**
-    Copyright 2014-2015 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ Copyright 2014-2015 Amazon.com, Inc. or its affiliates. All Rights Reserved.
 
-    Licensed under the Apache License, Version 2.0 (the "License"). You may not use this file except in compliance with the License. A copy of the License is located at
+ Licensed under the Apache License, Version 2.0 (the "License"). You may not use this file except in compliance with the License. A copy of the License is located at
 
-        http://aws.amazon.com/apache2.0/
+ http://aws.amazon.com/apache2.0/
 
-    or in the "license" file accompanying this file. This file is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
-*/
+ or in the "license" file accompanying this file. This file is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
+ */
 
 /**
  * This simple sample has no external dependencies or session management, and shows the most basic
@@ -64,7 +64,7 @@ ESportsReports.prototype.eventHandlers.onSessionEnded = function (sessionEndedRe
 ESportsReports.prototype.intentHandlers = {
     // register custom intent handlers
     "GetLoLSchedule": function (intent, session, response) {
-        response.tellWithCard("The League of Legends schedule is!", "The League of Legends schedule is", "The League of Legends schedule is!");
+        getEsportsSchedule();
     },
     "AMAZON.HelpIntent": function (intent, session, response) {
         response.ask("You can say ask me about the League of Legends schedule!", "You can say ask me about the League of Legends schedule!");
@@ -78,3 +78,63 @@ exports.handler = function (event, context) {
     eSportsReports.execute(event, context);
 };
 
+function getEsportsSchedule() {
+
+    var url = 'api.pandascore.co/all/v1/tournaments/1';
+
+    http.get(url, function (res) {
+        var noaaResponseString = '';
+
+        res.on('data', function (data) {
+            noaaResponseString += data;
+        });
+
+        res.on('end', function () {
+            var noaaResponseObject = JSON.parse(noaaResponseString);
+
+            if (noaaResponseObject.error) {
+                console.log("NOAA error: " + noaaResponseObj.error.message);
+            } else {
+                response.tellWithCard("The League of Legends schedule is!",
+                    "The League of Legends schedule is", "The League of Legends schedule is!");
+            }
+        });
+    }).on('error', function (e) {
+        console.log("Communications error: " + e.message);
+    });
+}
+
+function getEsportsSchedule2() {
+    var http = require("http");
+
+    var options = {
+        "method": "GET",
+        "hostname": "api.pandascore.co",
+        "port": null,
+        "path": "/all/v1/tournaments/1",
+        "headers": {
+            "authorization": "Bearer 112950-b3jkqCt49dzM85H0wslLA",
+            "cache-control": "no-cache",
+            "postman-token": "654d93a1-3c75-7097-d2a4-8d0af7623aec"
+        }
+    };
+
+    var data;
+
+    var req = http.request(options, function (res) {
+        var chunks = [];
+
+        res.on("data", function (chunk) {
+            chunks.push(chunk);
+        });
+
+        res.on("end", function () {
+            var body = Buffer.concat(chunks);
+            data = body.toString();
+        });
+    });
+
+    req.end();
+
+    var serializedData = JSON.parse(data);
+}
