@@ -137,7 +137,16 @@ ESportsReports.prototype.intentHandlers = {
 
         //Begins looping through events in json response
         getMatchList(function (jsonResponse) {
-            outputText += speakNextGame(jsonResponse);
+            outputText += speakNextGame(jsonResponse, true);
+            response.tellWithCard(outputText, "Match List Card", "Match List Card Stuff?");
+        }, "Get Next Match");
+    },
+    "GetLastMatch": function (intent, session, response) {
+        var outputText = '';
+
+        //Begins looping through events in json response
+        getMatchList(function (jsonResponse) {
+            outputText += speakNextGame(jsonResponse, false);
             response.tellWithCard(outputText, "Match List Card", "Match List Card Stuff?");
         }, "Get Next Match");
     },
@@ -153,7 +162,7 @@ exports.handler = function (event, context) {
     eSportsReports.execute(event, context);
 };
 
-function speakNextGame(jsonObject) {
+function speakNextGame(jsonObject, nextGame) {
     // Earliest event initialised to first event in json list
     var outputText = '';
     //Current Date for comparison
@@ -172,16 +181,24 @@ function speakNextGame(jsonObject) {
     {
         earliestDate = new Date(earliestEvent.start);
         var crtItemDate = new Date(jsonResponse[i].start);
-        //console.log(jsonResponse[i].start);
-        if (crtItemDate > currentDate && crtItemDate < earliestDate)
-        {
-            earliestEvent = jsonResponse[i];
-            earliestDate = crtItemDate;
+        var diff = Math.abs(currentDate - earliestDate);
+        if (nextGame) {
+            if (crtItemDate > currentDate && crtItemDate < earliestDate) {
+                earliestEvent = jsonResponse[i];
+                earliestDate = crtItemDate;
+            }
+        } else {
+            if ((Math.abs(currentDate - crtItemDate) < diff) && crtItemDate < currentDate)
+            {
+                earliestEvent = jsonResponse[i];
+                earliestDate = crtItemDate;
+            }
         }
     }
     // Creates output text based on what is earliest event
 
     console.log(earliestEvent.start);
+    earliestDate.setHours(earliestDate.getHours()+1);
     outputText += ('Next game is ' + earliestEvent.name + ' - starting on ' + earliestDate.toISOString().replace(/T/, ' ').replace(/\..+/, '') + ', with team(s) ');
     // Adds team names to event, if they exist
     if (earliestEvent.teams.length == 0)
