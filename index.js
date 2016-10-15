@@ -50,8 +50,8 @@ ESportsReports.prototype.eventHandlers.onSessionStarted = function (sessionStart
 
 ESportsReports.prototype.eventHandlers.onLaunch = function (launchRequest, session, response) {
     console.log("ESportsReports onLaunch requestId: " + launchRequest.requestId + ", sessionId: " + session.sessionId);
-    var speechOutput = "Would you like know the League of Legends schedule";
-    var repromptText = "You can say ask me about the League of Legends schedule";
+    var speechOutput = "Would you like to know the League of Legends worlds schedule";
+    var repromptText = "You can say ask me about the League of Legends worlds schedule";
     response.ask(speechOutput, repromptText);
 };
 
@@ -63,11 +63,11 @@ ESportsReports.prototype.eventHandlers.onSessionEnded = function (sessionEndedRe
 
 ESportsReports.prototype.intentHandlers = {
     // register custom intent handlers
-    "GetLoLSchedule": function (intent, session, response) {
+    "GetLoLWorldsSchedule": function (intent, session, response) {
         var outputText = '';
-        getEsportsSchedule2(function (jsonResponse) {
+        getEsportsSchedule(function (jsonResponse) {
             console.log(jsonResponse);
-            for (var i = 0; i < jsonResponse.length - 1; i++)
+            for (var i = 0; i < jsonResponse.length; i++)
             {
                 var dt = new Date(jsonResponse[i].start);
                 outputText += ('Match, with name ' + jsonResponse[i].name + ' - starting on ' + dt.toDateString() + ', with team(s) ');
@@ -107,12 +107,12 @@ ESportsReports.prototype.intentHandlers = {
             }
 
 
-            response.tellWithCard(outputText, outputText, outputText);
-        }, intent.slots.tournament.value);
+            response.tellWithCard(outputText, "Match List Card", "Match List Card Stuff?");
+        }, intent.slots.groups.value);
 
     },
     "AMAZON.HelpIntent": function (intent, session, response) {
-        response.ask("You can say ask me about the League of Legends schedule!", "You can say ask me about the League of Legends schedule!");
+        response.ask("You can say ask me about the League of Legends worlds schedule!", "You can say ask me about the League of Legends worlds schedule!");
     }
 };
 
@@ -123,11 +123,11 @@ exports.handler = function (event, context) {
     eSportsReports.execute(event, context);
 };
 
-function getEsportsSchedule2(callback, group) {
+function getEsportsSchedule(callback, groups) {
     var http = require("http");
     var tournamentID;
 
-    switch (group) {
+    switch (groups.toUpperCase()) {
         case 'A':
             tournamentID = 93;
             break;
@@ -140,7 +140,7 @@ function getEsportsSchedule2(callback, group) {
         case 'D':
             tournamentID = 96;
             break;
-        case 'Knockout':
+        case 'KNOCK OUT':
             tournamentID = 95;
             break;
     }
@@ -150,61 +150,6 @@ function getEsportsSchedule2(callback, group) {
         "hostname": "api.pandascore.co",
         "port": null,
         "path": "/lol/v1/matchlist?tournament=" + tournamentID,
-        "headers": {
-            "authorization": "Bearer 112950-b3jkqCt49dzM85H0wslLA",
-            "cache-control": "no-cache",
-            "postman-token": "654d93a1-3c75-7097-d2a4-8d0af7623aec"
-        }
-    };
-
-    var req = http.request(options, function (res) {
-        var chunks = [];
-
-        res.on("data", function (chunk) {
-            chunks.push(chunk);
-        });
-
-        res.on("end", function () {
-            var body = Buffer.concat(chunks);
-            callback(JSON.parse(body.toString()));
-        });
-    });
-
-    req.end();
-
-}
-
-function getEsportsTournamentMatchList(callback, group) {
-    var http = require("http");
-    console.log(group);
-    var tournamentID;
-
-    switch (group) {
-        case 'A':
-            tournamentID = 93;
-            break;
-        case 'B':
-            tournamentID = 92;
-            break;
-        case 'C':
-            tournamentID = 94;
-            break;
-        case 'D':
-            tournamentID = 96;
-            break;
-        case 'Knockout':
-            tournamentID = 95;
-            break;
-    }
-
-    console.log(tournamentID);
-
-    var options = {
-        "method": "GET",
-        "hostname": "api.pandascore.co",
-        "port": null,
-        //"path": "http://api.pandascore.co/lol/v1/matchlist?tournament=" + tournamentID,
-        "path": "http://api.pandascore.co/lol/v1/matchlist?tournament=75",
         "headers": {
             "authorization": "Bearer 112950-b3jkqCt49dzM85H0wslLA",
             "cache-control": "no-cache",
