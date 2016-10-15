@@ -73,7 +73,7 @@ ESportsReports.prototype.intentHandlers = {
                 outputText += ('Match, with name ' + jsonResponse[i].name + ' - starting on ' + dt.toDateString() + ', with team(s) ');
                 //if (jsonResponse[i].teams.length > 1)
                 //{
-                for (var j = 0; j < jsonResponse[i].teams.length - 1; j++){
+                for (var j = 0; j < jsonResponse[i].teams.length; j++){
                     if (j !== 0)
                     {
                         outputText += ' and ';
