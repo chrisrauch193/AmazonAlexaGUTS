@@ -70,86 +70,48 @@ ESportsReports.prototype.intentHandlers = {
     "GetGroupMatchList": function (intent, session, response) {
         getMatchList(function (jsonResponse) {
             var outputText = '';
-            matchList = jsonResponse;
-            console.log(matchList);
+            currentMatchList = jsonResponse;
             outputText += "Getting Match List for Group " + intent.slots.groups.value + ". ";
-            outputText += speakMatchList(matchList);
-            console.log(outputText);
-
-
+            outputText += speakMatchList(currentMatchList);
             response.tellWithCard(outputText, "Match List Card", "Match List Card Stuff?");
         }, intent.slots.groups.value);
     },
-    "GetALLGroupMatchList": function (intent, session, response) {
-        getMatchList(function (jsonResponse) {
-            var outputText = '';
-            matchList = jsonResponse;
-            console.log(matchList);
-            outputText += "Getting Match List for all Groups. ";
-            outputText += speakMatchList(matchList);
-            console.log(outputText);
-
-
-            response.tellWithCard(outputText, "Match List Card", "Match List Card Stuff?");
-        }, 'ALLGROUPS');
+    "GetAllGroupMatchList": function (intent, session, response) {
+        var outputText = '';
+        createGroupStageJSON();
+        outputText += "Getting Match List for all Groups. ";
+        outputText += JSON.stringify(currentMatch);
+        response.tellWithCard(outputText, "Match List Card", "Match List Card Stuff?");
+    },
+    "GetAllMatchList": function (intent, session, response) {
+        var outputText = '';
+        createWorldsJSON();
+        outputText += "Getting Match List for all Games in the tournament. ";
+        outputText += JSON.stringify(currentMatch);
+        response.tellWithCard(outputText, "Match List Card", "Match List Card Stuff?");
     },
     "GetKnockoutRoundMatchList": function (intent, session, response) {
         getMatchList(function (jsonResponse) {
             var outputText = '';
-            matchList = jsonResponse;
-            var newMatchList = [];
-            console.log(matchList);
-            switch (intent.slots.rounds.value.toUpperCase()) {
-                case "QUARTER FINAL":
-                    outputText += "Getting Match List for the Quarter finals. ";
-                    for (var i = 0; i < matchList.length; i++) {
-                        if (matchList[i].name.substring(0,2) === "R1") {
-                            newMatchList.push(matchList[i]);
-                        }
-                    }
-                    break;
-                case "SEMI FINAL":
-                    outputText += "Getting Match List for the Semi finals. ";
-                    for (var i = 0; i < matchList.length; i++) {
-                        if (matchList[i].name.substring(0,2) === "R2")  {
-                            newMatchList.push(matchList[i]);
-                        }
-                    }
-                    break;
-                case "FINAL":
-                    outputText += "Getting Match for the final. ";
-                    for (var i = 0; i < matchList.length; i++) {
-                        if (matchList[i].name.substring(0,2) === "R3")  {
-                            newMatchList.push(matchList[i]);
-                        }
-                    }
-                    break;
-            }
-            outputText += speakMatchList(newMatchList);
-
-
+            outputText += speakKnockoutRoundMatchList(jsonResponse, intent.slots.rounds.value);
             response.tellWithCard(outputText, "Match List Card", "Match List Card Stuff?");
         }, "KNOCKOUT");
-
     },
     "GetKnockoutList": function (intent, session, response) {
         getMatchList(function (jsonResponse) {
             var outputText = '';
-            matchList = jsonResponse;
-            console.log(matchList);
+            currentMatchList = jsonResponse;
+            console.log(currentMatchList);
             outputText += "Getting Match List for all of the Knockout Stages. ";
-            outputText += speakMatchList(matchList);
-
-
+            outputText += speakMatchList(currentMatchList);
             response.tellWithCard(outputText, "Match List Card", "Match List Card Stuff?");
         }, "KNOCKOUT");
-
     },
     "GetNextMatch": function (intent, session, response) {
         //Begins looping through events in json response
         getMatchList(function (jsonResponse) {
             var outputText = '';
-            outputText += "Getting next game to be played";
+            outputText += "Getting next game to be played. ";
             outputText += speakNextGame(jsonResponse, true);
             response.tellWithCard(outputText, "Match List Card", "Match List Card Stuff?");
         }, "Get Next Match");
@@ -158,7 +120,7 @@ ESportsReports.prototype.intentHandlers = {
         //Begins looping through events in json response
         getMatchList(function (jsonResponse) {
             var outputText = '';
-            outputText += "Getting last game that was played";
+            outputText += "Getting last game that was played. ";
             outputText += speakNextGame(jsonResponse, false);
             response.tellWithCard(outputText, "Match List Card", "Match List Card Stuff?");
         }, "Get Next Match");
@@ -182,6 +144,28 @@ exports.handler = function (event, context) {
     var eSportsReports = new ESportsReports();
     eSportsReports.execute(event, context);
 };
+
+function createGroupStageJSON() {
+    //creates a JSON object of all the group stage matches and assigns it to the global variable
+    currentMatch = '';
+    var groupArray = ["A", "B", "C", "D"];
+    for (var i = 0; i < 4; i++) {
+        getMatchList(function (jsonResponse) {
+            currentMatch.push(jsonResponse)
+        }, groupArray[i]);
+    }
+}
+
+function createWorldsJSON() {
+    //creates a JSON object of all the tournament matches and assigns it to the global variable
+    currentMatch = '';
+    var groupArray = ["A", "B", "C", "D", "KNOCKOUT"];
+    for (var i = 0; i < 5; i++) {
+        getMatchList(function (jsonResponse) {
+            currentMatch.push(jsonResponse)
+        }, groupArray[i]);
+    }
+}
 
 function speakNextGame(jsonObject, nextGame) {
     // Earliest event initialised to first event in json list
@@ -247,6 +231,41 @@ function speakNextGame(jsonObject, nextGame) {
         });
         outputText += (' The winner was ' + t[0].name + '. ');
     }
+    return outputText;
+}
+
+function speakKnockoutRoundMatchList(jsonResponse, round) {
+    var outputText = '';
+    currentMatchList = jsonResponse;
+    var newMatchList = [];
+    switch (round.toUpperCase()) {
+        case "QUARTER FINAL":
+            outputText += "Getting Match List for the Quarter finals. ";
+            for (var i = 0; i < currentMatchList.length; i++) {
+                if (currentMatchList[i].name.substring(0,2) === "R1") {
+                    newMatchList.push(currentMatchList[i]);
+                }
+            }
+            break;
+        case "SEMI FINAL":
+            outputText += "Getting Match List for the Semi finals. ";
+            for (var i = 0; i < currentMatchList.length; i++) {
+                if (currentMatchList[i].name.substring(0,2) === "R2")  {
+                    newMatchList.push(currentMatchList[i]);
+                }
+            }
+            break;
+        case "FINAL":
+            outputText += "Getting Match for the final. ";
+            for (var i = 0; i < currentMatchList.length; i++) {
+                if (currentMatchList[i].name.substring(0,2) === "R3")  {
+                    newMatchList.push(currentMatchList[i]);
+                }
+            }
+            break;
+    }
+    outputText += speakMatchList(newMatchList);
+
     return outputText;
 }
 
@@ -322,6 +341,7 @@ function speakFutureTournamentList(jsonResponse) {
             outputText += filteredData[i].total_prizepool + ' dollars.';
         }
     }
+    return outputText;
 }
 
 function getFutureTournamentList(callback) {

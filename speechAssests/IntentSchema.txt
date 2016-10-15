@@ -1,11 +1,33 @@
 {
   "intents": [
     {
-      "intent": "GetLoLWorldsSchedule",
+      "intent": "GetGroupMatchList",
       "slots" : [{
         "name" : "groups",
         "type" : "LIST_OF_GROUPS"
       }]
+    },
+    {
+      "intent": "GetAllGroupMatchList"
+    },
+    {
+      "intent": "GetKnockoutRoundMatchList",
+      "slots" : [{
+        "name" : "rounds",
+        "type" : "KNOCKOUT_ROUNDS"
+      }]
+    },
+    {
+      "intent": "GetKnockoutList"
+    },
+    {
+      "intent": "GetAllMatchList"
+    },
+    {
+      "intent": "GetLastMatch"
+    },
+    {
+      "intent": "GetNextMatch"
     },
     {
       "intent": "AMAZON.HelpIntent"

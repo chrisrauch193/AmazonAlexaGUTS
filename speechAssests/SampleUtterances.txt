@@ -1,1 +1,29 @@
-GetLoLWorldsSchedule Group {groups}
+GetGroupMatchList Group {groups}
+GetKnockoutRoundMatchList Knockout {rounds}
+GetKnockoutRoundMatchList Knock Out {rounds}
+GetKnockoutList Knockout
+GetKnockoutList Knock Out
+GetKnockoutList Knockout Matches
+GetKnockoutList Knock Out Matches
+GetKnockoutList Knockout Games
+GetKnockoutList Knock Out Games
+GetKnockoutList Knockout List
+GetKnockoutList Knock Out List
+GetNextMatch Next Match
+GetNextMatch Next Game
+GetNextMatch Tomorrows Match
+GetNextMatch Tomorrows Game
+GetNextMatch Tonights Match
+GetNextMatch Tonights Game
+GetLastMatch Last Match
+GetLastMatch Last Game
+GetLastMatch Yesterdays Match
+GetLastMatch Yesterdays Game
+GetLastMatch Last Nights Match
+GetLastMatch Last Nights Game
+GetAllGroupMatchList Group Stage
+GetAllGroupMatchList All Group
+GetAllMatchList All
+GetAllMatchList Game
+GetAllMatchList Games
+GetAllMatchList Matches
