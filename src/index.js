@@ -73,18 +73,28 @@ ESportsReports.prototype.intentHandlers = {
             {
                 var dt = new Date(jsonResponse[i].start);
                 outputText += ('Match, with name ' + jsonResponse[i].name + ' - starting on ' + dt.toDateString() + ', with team(s) ');
-                //if (jsonResponse[i].teams.length > 1)
-                //{
+
                 for (var j = 0; j < jsonResponse[i].teams.length; j++){
-                    if (j !== 0)
-                    {
-                        outputText += ' and ';
-                    }
+
                     console.log('Length of teams: ' + jsonResponse[i].teams.length)
                     console.log(JSON.stringify(jsonResponse[i].teams) + ' - Value of j: ' + j);
-                    outputText += (jsonResponse[i].teams[j].name + '. ');
+                    outputText += (jsonResponse[i].teams[j].name);
+                    if (j !== 1 && jsonResponse[i].teams.length >= 2)
+                    {
+                        outputText += ', and ';
+                    }
+
+                    if (j !== 0 || (j == 0 && jsonResponse[i].teams.length == 1)) {
+                        outputText +=  '. ';
+                    }
 
                 }
+
+                if (jsonResponse[i].teams.length == 0)
+                {
+                    outputText += ', not decided yet. ';
+                }
+
                 console.log(JSON.stringify(jsonResponse[i]));
                 console.log(jsonResponse[i].winner_id);
                 if (jsonResponse[i].winner_id !== null)
@@ -96,16 +106,9 @@ ESportsReports.prototype.intentHandlers = {
                         return e.id === winnerId;
                     });
                     console.log(JSON.stringify(t));
-                    outputText += ('where the winner is ' + t[0].name + '. ');
+                    outputText += (' The winner was ' + t[0].name + '. ');
                 }
 
-                //else
-                //{
-                //    if (jsonResponse[i].teams.length == 1)
-                //    {
-                //        outputText += (jsonResponse[i].teams[0].name + ' however, the opponent is not known yet.');
-                //    }
-                //}
             }
 
 
@@ -121,22 +124,28 @@ ESportsReports.prototype.intentHandlers = {
             {
                 var dt = new Date(jsonResponse[i].start);
                 outputText += ('Match, with name ' + jsonResponse[i].name + ' - starting on ' + dt.toDateString() + ', with team(s) ');
-                //if (jsonResponse[i].teams.length > 1)
-                //{
+
                 for (var j = 0; j < jsonResponse[i].teams.length; j++){
+
                     console.log('Length of teams: ' + jsonResponse[i].teams.length)
                     console.log(JSON.stringify(jsonResponse[i].teams) + ' - Value of j: ' + j);
                     outputText += (jsonResponse[i].teams[j].name);
-                    if (j !== 1)
+                    if (j !== 1 && jsonResponse[i].teams.length >= 2)
                     {
-                        outputText += ' and ';
+                        outputText += ', and ';
                     }
 
-                    if (j !== 0) {
+                    if (j !== 0 || (j == 0 && jsonResponse[i].teams.length == 1)) {
                         outputText +=  '. ';
                     }
 
                 }
+
+                if (jsonResponse[i].teams.length == 0)
+                {
+                    outputText += ', not decided yet. ';
+                }
+
                 console.log(JSON.stringify(jsonResponse[i]));
                 console.log(jsonResponse[i].winner_id);
                 if (jsonResponse[i].winner_id !== null)
@@ -148,16 +157,9 @@ ESportsReports.prototype.intentHandlers = {
                         return e.id === winnerId;
                     });
                     console.log(JSON.stringify(t));
-                    outputText += ('where the winner is ' + t[0].name + '. ');
+                    outputText += (' The winner was ' + t[0].name + '. ');
                 }
 
-                //else
-                //{
-                //    if (jsonResponse[i].teams.length == 1)
-                //    {
-                //        outputText += (jsonResponse[i].teams[0].name + ' however, the opponent is not known yet.');
-                //    }
-                //}
             }
 
 
