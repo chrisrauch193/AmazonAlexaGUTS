@@ -66,15 +66,16 @@ ESportsReports.prototype.intentHandlers = {
     "GetLoLSchedule": function (intent, session, response) {
         //getEsportsSchedule2();
 
+        /*
         //var noaaResponseObject = JSON.parse(noaaResponseString);
         var jsonObject = {"id":1,"name":"Cloud9 ","acronym":"C9","roster":[
             {"id":24,
                 "name":"Bunny FuFuu","first_name":"Michael","last_name":"Kurylo","role":"Support",
                 "bio":"Known for his Thresh picks, Michael Bunny Fufuu Kurylo is a long time support " +
-                "player in the NA scene. Bunny Fufuu originally played support for Curse during the 2014 NA " +
+                "player in the N A scene. Bunny Fufuu originally played support for Curse during the 2014 N A " +
                 "LCS Spring Split before moving to Curse Academy (now Gravity). Bunny Fufuu has continued to pull" +
-                " out his aggressive moves in the bot lane as Gravity battled through their debut season in the NA " +
-                "LCS.","hometown":null},
+                " out his aggressive moves in the bot lane as Gravity battled through their debut season in the N A " +
+                "L C S.","hometown":null},
             {"id":13,"name":"Incarnati0n","first_name":"Nicolaj","last_name":"Jensen",
                 "role":"Mid Lane","bio":"Nicolaj Incarnati0n Jensen is a high elo mid laner from Denmark known " +
             "for favoring assassin champions like Zed and Fizz. Incarnati0n launched his esports career with " +
@@ -156,6 +157,13 @@ ESportsReports.prototype.intentHandlers = {
 
         response.tellWithCard(bunny.bio,
             bunny.bio, bunny.bio);
+            */
+        getEsportsSchedule2(function (jsonResponse) {
+            console.log(jsonResponse);
+            response.tellWithCard(jsonResponse.name,
+                jsonResponse.name, jsonResponse.name);
+        });
+
     },
     "AMAZON.HelpIntent": function (intent, session, response) {
         response.ask("You can say ask me about the League of Legends schedule!", "You can say ask me about the League of Legends schedule!");
@@ -191,14 +199,14 @@ function getEsportsSchedule() {
     })
 }
 
-function getEsportsSchedule2() {
+function getEsportsSchedule2(callback) {
     var http = require("http");
 
     var options = {
         "method": "GET",
         "hostname": "api.pandascore.co",
         "port": null,
-        "path": "/all/v1/tournaments/1",
+        "path": "/lol/v1/matches/1",
         "headers": {
             "authorization": "Bearer 112950-b3jkqCt49dzM85H0wslLA",
             "cache-control": "no-cache",
@@ -206,24 +214,19 @@ function getEsportsSchedule2() {
         }
     };
 
+    var req = http.request(options, function (res) {
+        var chunks = [];
 
-
-    var data;
-
-    var req = http.request('http://api.pandascore.co/lol/v1/matches/1', function (res) {
-        var noaaResponseString = '';
-
-        res.on("data", function (noaaResponseString) {
-            noaaResponseString += data;
+        res.on("data", function (chunk) {
+            chunks.push(chunk);
         });
 
         res.on("end", function () {
-            var noaaResponseObject = JSON.parse(noaaResponseString);
-
-            response.tellWithCard("The League of Legends schedule is!",
-                "The League of Legends schedule is", "The League of Legends schedule is!");
+            var body = Buffer.concat(chunks);
+            callback(JSON.parse(body.toString()));
         });
     });
 
     req.end();
+
 }
