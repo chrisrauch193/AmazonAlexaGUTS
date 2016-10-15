@@ -130,6 +130,7 @@ function createSpeechObject(optionsParam) {
 
 Response.prototype = (function () {
     var buildSpeechletResponse = function (options) {
+        console.log(JSON.stringify(options));
         var alexaResponse = {
             outputSpeech: createSpeechObject(options.output),
             shouldEndSession: options.shouldEndSession
