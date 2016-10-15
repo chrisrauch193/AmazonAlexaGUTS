@@ -132,6 +132,15 @@ ESportsReports.prototype.intentHandlers = {
         }, "KNOCKOUT");
 
     },
+    "GetNextMatch": function (intent, session, response) {
+        var outputText = '';
+
+        //Begins looping through events in json response
+        getMatchList(function (jsonResponse) {
+            outputText += speakNextGame(jsonResponse);
+            response.tellWithCard(outputText, "Match List Card", "Match List Card Stuff?");
+        }, "Get Next Match");
+    },
     "AMAZON.HelpIntent": function (intent, session, response) {
         response.ask("You can say ask me about the League of Legends worlds schedule!", "You can say ask me about the League of Legends worlds schedule!");
     }
@@ -143,6 +152,65 @@ exports.handler = function (event, context) {
     var eSportsReports = new ESportsReports();
     eSportsReports.execute(event, context);
 };
+
+function speakNextGame(jsonObject) {
+    // Earliest event initialised to first event in json list
+    var outputText = '';
+    //Current Date for comparison
+    var currentDate = Date.now();
+    var jsonResponse = jsonObject.filter(function (e) {
+        return (e.start !== null & e.start != 'no start time');
+    });
+    var earliestEvent;
+    if (jsonResponse.length > 0)
+    {
+        earliestEvent = jsonResponse[0];
+    }
+    var earliestDate;
+    console.log(jsonObject);
+    for (var i = 1; i < jsonResponse.length; i++)
+    {
+        earliestDate = new Date(earliestEvent.start);
+        var crtItemDate = new Date(jsonResponse[i].start);
+        //console.log(jsonResponse[i].start);
+        if (crtItemDate > currentDate && crtItemDate < earliestDate)
+        {
+            earliestEvent = jsonResponse[i];
+            earliestDate = crtItemDate;
+        }
+    }
+    // Creates output text based on what is earliest event
+
+    console.log(earliestEvent.start);
+    outputText += ('Next game is ' + earliestEvent.name + ' - starting on ' + earliestDate.toISOString().replace(/T/, ' ').replace(/\..+/, '') + ', with team(s) ');
+    // Adds team names to event, if they exist
+    if (earliestEvent.teams.length == 0)
+    {
+        outputText += ', not decided yet. ';
+    } else {
+        for (var j = 0; j < earliestEvent.teams.length; j++) {
+            outputText += (earliestEvent.teams[j].name);
+            if (j !== 1 && earliestEvent.teams.length >= 2)
+            {
+                outputText += ', and ';
+            }
+
+            if (j !== 0 || (j == 0 && earliestEvent.teams.length == 1)) {
+                outputText += '. ';
+            }
+        }
+    }
+
+    if (earliestEvent.winner_id !== null)
+    {
+        var winnerId = earliestEvent.winner_id;
+        var t = earliestEvent.teams.filter(function (e) {
+            return e.id === winnerId;
+        });
+        outputText += (' The winner was ' + t[0].name + '. ');
+    }
+    return outputText;
+}
 
 function speakMatchList(jsonObject) {
     var outputText = "";
@@ -197,19 +265,22 @@ function getMatchList(callback, groups) {
 
     switch (groups.toUpperCase()) {
         case 'A':
-            tournamentID = 93;
+            tournamentID = "?tournament=" + 93;
             break;
         case 'B':
-            tournamentID = 92;
+            tournamentID = "?tournament=" + 92;
             break;
         case 'C':
-            tournamentID = 94;
+            tournamentID = "?tournament=" + 94;
             break;
         case 'D':
-            tournamentID = 96;
+            tournamentID = "?tournament=" + 96;
             break;
         case 'KNOCKOUT':
-            tournamentID = 95;
+            tournamentID = "?tournament=" + 95;
+            break;
+        default:
+            tournamentID = "";
             break;
     }
 
@@ -217,7 +288,7 @@ function getMatchList(callback, groups) {
         "method": "GET",
         "hostname": "api.pandascore.co",
         "port": null,
-        "path": "/lol/v1/matchlist?tournament=" + tournamentID,
+        "path": "/lol/v1/matchlist" + tournamentID,
         "headers": {
             "authorization": "Bearer 112950-b3jkqCt49dzM85H0wslLA",
             "cache-control": "no-cache",
