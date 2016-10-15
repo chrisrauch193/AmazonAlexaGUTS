@@ -38,6 +38,8 @@ var ESportsReports = function () {
     AlexaSkill.call(this, APP_ID);
 };
 
+var matchList;
+
 // Extend AlexaSkill
 ESportsReports.prototype = Object.create(AlexaSkill.prototype);
 ESportsReports.prototype.constructor = ESportsReports;
@@ -63,9 +65,9 @@ ESportsReports.prototype.eventHandlers.onSessionEnded = function (sessionEndedRe
 
 ESportsReports.prototype.intentHandlers = {
     // register custom intent handlers
-    "GetLoLWorldsSchedule": function (intent, session, response) {
+    "GetGroupMatchList": function (intent, session, response) {
         var outputText = '';
-        getEsportsSchedule(function (jsonResponse) {
+        getMatchList(function (jsonResponse) {
             console.log(jsonResponse);
             for (var i = 0; i < jsonResponse.length; i++)
             {
@@ -111,6 +113,58 @@ ESportsReports.prototype.intentHandlers = {
         }, intent.slots.groups.value);
 
     },
+    "GetKnockoutMatchList": function (intent, session, response) {
+        var outputText = '';
+        getMatchList(function (jsonResponse) {
+            console.log(jsonResponse);
+            for (var i = 0; i < jsonResponse.length; i++)
+            {
+                var dt = new Date(jsonResponse[i].start);
+                outputText += ('Match, with name ' + jsonResponse[i].name + ' - starting on ' + dt.toDateString() + ', with team(s) ');
+                //if (jsonResponse[i].teams.length > 1)
+                //{
+                for (var j = 0; j < jsonResponse[i].teams.length; j++){
+                    console.log('Length of teams: ' + jsonResponse[i].teams.length)
+                    console.log(JSON.stringify(jsonResponse[i].teams) + ' - Value of j: ' + j);
+                    outputText += (jsonResponse[i].teams[j].name);
+                    if (j !== 1)
+                    {
+                        outputText += ' and ';
+                    }
+
+                    if (j !== 0) {
+                        outputText +=  '. ';
+                    }
+
+                }
+                console.log(JSON.stringify(jsonResponse[i]));
+                console.log(jsonResponse[i].winner_id);
+                if (jsonResponse[i].winner_id !== null)
+                {
+                    var winnerId = jsonResponse[i].winner_id;
+                    var t = jsonResponse[i].teams.filter(function (e) {
+                        console.log(JSON.stringify(e));
+                        console.log(e.id + ' ' + winnerId + ' = ' + (e.id === winnerId));
+                        return e.id === winnerId;
+                    });
+                    console.log(JSON.stringify(t));
+                    outputText += ('where the winner is ' + t[0].name + '. ');
+                }
+
+                //else
+                //{
+                //    if (jsonResponse[i].teams.length == 1)
+                //    {
+                //        outputText += (jsonResponse[i].teams[0].name + ' however, the opponent is not known yet.');
+                //    }
+                //}
+            }
+
+
+            response.tellWithCard(outputText, "Match List Card", "Match List Card Stuff?");
+        }, "KNOCKOUT");
+
+    },
     "AMAZON.HelpIntent": function (intent, session, response) {
         response.ask("You can say ask me about the League of Legends worlds schedule!", "You can say ask me about the League of Legends worlds schedule!");
     }
@@ -123,7 +177,44 @@ exports.handler = function (event, context) {
     eSportsReports.execute(event, context);
 };
 
-function getEsportsSchedule(callback, groups) {
+function speakMatchList(jsonObject) {
+    var outputText = "";
+    jsonObject = jsonObject;
+    for (var i = 0; i < jsonObject.length; i++)
+    {
+        var dt = new Date(jsonObject[i].start);
+        outputText += ('Match, with name ' + jsonObject[i].name + ' - starting on ' + dt.toDateString() + ', with team(s) ');
+        for (var j = 0; j < jsonObject[i].teams.length; j++){
+            console.log('Length of teams: ' + jsonObject[i].teams.length)
+            console.log(JSON.stringify(jsonObject[i].teams) + ' - Value of j: ' + j);
+            outputText += (jsonObject[i].teams[j].name);
+            if (j !== 1)
+            {
+                outputText += ' and ';
+            }
+
+            if (j !== 0) {
+                outputText +=  '. ';
+            }
+
+        }
+        console.log(JSON.stringify(jsonObject[i]));
+        console.log(jsonObject[i].winner_id);
+        if (jsonObject[i].winner_id !== null)
+        {
+            var winnerId = jsonObject[i].winner_id;
+            var t = jsonObject[i].teams.filter(function (e) {
+                console.log(JSON.stringify(e));
+                console.log(e.id + ' ' + winnerId + ' = ' + (e.id === winnerId));
+                return e.id === winnerId;
+            });
+            console.log(JSON.stringify(t));
+            outputText += ('where the winner is ' + t[0].name + '. ');
+        }
+    }
+}
+
+function getMatchList(callback, groups) {
     var http = require("http");
     var tournamentID;
 
@@ -140,7 +231,7 @@ function getEsportsSchedule(callback, groups) {
         case 'D':
             tournamentID = 96;
             break;
-        case 'KNOCK OUT':
+        case 'KNOCKOUT':
             tournamentID = 95;
             break;
     }
