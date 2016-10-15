@@ -38,7 +38,9 @@ var ESportsReports = function () {
     AlexaSkill.call(this, APP_ID);
 };
 
-var matchList;
+var currentMatchList;
+var currentMatch;
+
 
 // Extend AlexaSkill
 ESportsReports.prototype = Object.create(AlexaSkill.prototype);
@@ -68,99 +70,62 @@ ESportsReports.prototype.intentHandlers = {
     "GetGroupMatchList": function (intent, session, response) {
         var outputText = '';
         getMatchList(function (jsonResponse) {
-            console.log(jsonResponse);
-            for (var i = 0; i < jsonResponse.length; i++)
-            {
-                var dt = new Date(jsonResponse[i].start);
-                outputText += ('Match, with name ' + jsonResponse[i].name + ' - starting on ' + dt.toDateString() + ', with team(s) ');
-
-                for (var j = 0; j < jsonResponse[i].teams.length; j++){
-
-                    console.log('Length of teams: ' + jsonResponse[i].teams.length)
-                    console.log(JSON.stringify(jsonResponse[i].teams) + ' - Value of j: ' + j);
-                    outputText += (jsonResponse[i].teams[j].name);
-                    if (j !== 1 && jsonResponse[i].teams.length >= 2)
-                    {
-                        outputText += ', and ';
-                    }
-
-                    if (j !== 0 || (j == 0 && jsonResponse[i].teams.length == 1)) {
-                        outputText +=  '. ';
-                    }
-
-                }
-
-                if (jsonResponse[i].teams.length == 0)
-                {
-                    outputText += ', not decided yet. ';
-                }
-
-                console.log(JSON.stringify(jsonResponse[i]));
-                console.log(jsonResponse[i].winner_id);
-                if (jsonResponse[i].winner_id !== null)
-                {
-                    var winnerId = jsonResponse[i].winner_id;
-                    var t = jsonResponse[i].teams.filter(function (e) {
-                        console.log(JSON.stringify(e));
-                        console.log(e.id + ' ' + winnerId + ' = ' + (e.id === winnerId));
-                        return e.id === winnerId;
-                    });
-                    console.log(JSON.stringify(t));
-                    outputText += (' The winner was ' + t[0].name + '. ');
-                }
-
-            }
+            matchList = jsonResponse;
+            console.log(matchList);
+            outputText = "Getting Match List for Group " + intent.slots.groups.value + ". ";
+            outputText += speakMatchList(matchList);
+            console.log(outputText);
 
 
             response.tellWithCard(outputText, "Match List Card", "Match List Card Stuff?");
         }, intent.slots.groups.value);
+    },
+    "GetKnockoutRoundMatchList": function (intent, session, response) {
+        var outputText = '';
+        getMatchList(function (jsonResponse) {
+            matchList = jsonResponse;
+            var newMatchList = [];
+            console.log(matchList);
+            switch (intent.slots.rounds.value.toUpperCase()) {
+                case "QUARTER FINAL":
+                    outputText = "Getting Match List for the Quarter finals. ";
+                    for (var i = 0; i < matchList.length; i++) {
+                        if (matchList[i].name.substring(0,2) === "R1") {
+                            newMatchList.push(matchList[i]);
+                        }
+                    }
+                    break;
+                case "SEMI FINAL":
+                    outputText = "Getting Match List for the Semi finals. ";
+                    for (var i = 0; i < matchList.length; i++) {
+                        if (matchList[i].name.substring(0,2) === "R2")  {
+                            newMatchList.push(matchList[i]);
+                        }
+                    }
+                    break;
+                case "FINAL":
+                    outputText = "Getting Match for the final. ";
+                    for (var i = 0; i < matchList.length; i++) {
+                        if (matchList[i].name.substring(0,2) === "R3")  {
+                            newMatchList.push(matchList[i]);
+                        }
+                    }
+                    break;
+            }
+            outputText += speakMatchList(newMatchList);
+
+
+            response.tellWithCard(outputText, "Match List Card", "Match List Card Stuff?");
+        }, "KNOCKOUT");
 
     },
     "GetKnockoutList": function (intent, session, response) {
         var outputText = '';
         getMatchList(function (jsonResponse) {
-            console.log(jsonResponse);
-            for (var i = 0; i < jsonResponse.length; i++)
-            {
-                var dt = new Date(jsonResponse[i].start);
-                outputText += ('Match, with name ' + jsonResponse[i].name + ' - starting on ' + dt.toDateString() + ', with team(s) ');
-
-                for (var j = 0; j < jsonResponse[i].teams.length; j++){
-
-                    console.log('Length of teams: ' + jsonResponse[i].teams.length)
-                    console.log(JSON.stringify(jsonResponse[i].teams) + ' - Value of j: ' + j);
-                    outputText += (jsonResponse[i].teams[j].name);
-                    if (j !== 1 && jsonResponse[i].teams.length >= 2)
-                    {
-                        outputText += ', and ';
-                    }
-
-                    if (j !== 0 || (j == 0 && jsonResponse[i].teams.length == 1)) {
-                        outputText +=  '. ';
-                    }
-
-                }
-
-                if (jsonResponse[i].teams.length == 0)
-                {
-                    outputText += ', not decided yet. ';
-                }
-
-                console.log(JSON.stringify(jsonResponse[i]));
-                console.log(jsonResponse[i].winner_id);
-                if (jsonResponse[i].winner_id !== null)
-                {
-                    var winnerId = jsonResponse[i].winner_id;
-                    var t = jsonResponse[i].teams.filter(function (e) {
-                        console.log(JSON.stringify(e));
-                        console.log(e.id + ' ' + winnerId + ' = ' + (e.id === winnerId));
-                        return e.id === winnerId;
-                    });
-                    console.log(JSON.stringify(t));
-                    outputText += (' The winner was ' + t[0].name + '. ');
-                }
-
-            }
+            matchList = jsonResponse;
+            console.log(matchList);
+            outputText = "Getting Match List for all of the Knockout Stages. ";
+            outputText += speakMatchList(matchList);
 
 
             response.tellWithCard(outputText, "Match List Card", "Match List Card Stuff?");
@@ -181,39 +146,49 @@ exports.handler = function (event, context) {
 
 function speakMatchList(jsonObject) {
     var outputText = "";
-    jsonObject = jsonObject;
-    for (var i = 0; i < jsonObject.length; i++)
+    var jsonResponse = jsonObject;
+    for (var i = 0; i < jsonResponse.length; i++)
     {
-        var dt = new Date(jsonObject[i].start);
-        outputText += ('Match, with name ' + jsonObject[i].name + ' - starting on ' + dt.toDateString() + ', with team(s) ');
-        for (var j = 0; j < jsonObject[i].teams.length; j++){
-            console.log('Length of teams: ' + jsonObject[i].teams.length)
-            console.log(JSON.stringify(jsonObject[i].teams) + ' - Value of j: ' + j);
-            outputText += (jsonObject[i].teams[j].name);
-            if (j !== 1)
+        var dt = new Date(jsonResponse[i].start);
+        outputText += ('Match, with name ' + jsonResponse[i].name + ' - starting on ' + dt.toDateString() + ', with team(s) ');
+
+        for (var j = 0; j < jsonResponse[i].teams.length; j++){
+
+            console.log('Length of teams: ' + jsonResponse[i].teams.length)
+            console.log(JSON.stringify(jsonResponse[i].teams) + ' - Value of j: ' + j);
+            outputText += (jsonResponse[i].teams[j].name);
+            if (j !== 1 && jsonResponse[i].teams.length >= 2)
             {
-                outputText += ' and ';
+                outputText += ', and ';
             }
 
-            if (j !== 0) {
+            if (j !== 0 || (j == 0 && jsonResponse[i].teams.length == 1)) {
                 outputText +=  '. ';
             }
 
         }
-        console.log(JSON.stringify(jsonObject[i]));
-        console.log(jsonObject[i].winner_id);
-        if (jsonObject[i].winner_id !== null)
+
+        if (jsonResponse[i].teams.length == 0)
         {
-            var winnerId = jsonObject[i].winner_id;
-            var t = jsonObject[i].teams.filter(function (e) {
+            outputText += ', not decided yet. ';
+        }
+
+        console.log(JSON.stringify(jsonResponse[i]));
+        console.log(jsonResponse[i].winner_id);
+        if (jsonResponse[i].winner_id !== null)
+        {
+            var winnerId = jsonResponse[i].winner_id;
+            var t = jsonResponse[i].teams.filter(function (e) {
                 console.log(JSON.stringify(e));
                 console.log(e.id + ' ' + winnerId + ' = ' + (e.id === winnerId));
                 return e.id === winnerId;
             });
             console.log(JSON.stringify(t));
-            outputText += ('where the winner is ' + t[0].name + '. ');
+            outputText += (' The winner was ' + t[0].name + '. ');
         }
+
     }
+    return outputText;
 }
 
 function getMatchList(callback, groups) {
