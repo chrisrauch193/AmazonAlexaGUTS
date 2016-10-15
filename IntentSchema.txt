@@ -1,0 +1,14 @@
+{
+  "intents": [
+    {
+      "intent": "GetLoLWorldsSchedule",
+      "slots" : [{
+        "name" : "groups",
+        "type" : "LIST_OF_GROUPS"
+      }]
+    },
+    {
+      "intent": "AMAZON.HelpIntent"
+    }
+  ]
+}

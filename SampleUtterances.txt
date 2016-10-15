@@ -1,0 +1,1 @@
+GetLoLWorldsSchedule Group {groups}
