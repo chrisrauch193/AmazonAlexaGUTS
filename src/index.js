@@ -68,11 +68,11 @@ ESportsReports.prototype.eventHandlers.onSessionEnded = function (sessionEndedRe
 ESportsReports.prototype.intentHandlers = {
     // register custom intent handlers
     "GetGroupMatchList": function (intent, session, response) {
-        var outputText = '';
         getMatchList(function (jsonResponse) {
+            var outputText = '';
             matchList = jsonResponse;
             console.log(matchList);
-            outputText = "Getting Match List for Group " + intent.slots.groups.value + ". ";
+            outputText += "Getting Match List for Group " + intent.slots.groups.value + ". ";
             outputText += speakMatchList(matchList);
             console.log(outputText);
 
@@ -80,15 +80,28 @@ ESportsReports.prototype.intentHandlers = {
             response.tellWithCard(outputText, "Match List Card", "Match List Card Stuff?");
         }, intent.slots.groups.value);
     },
-    "GetKnockoutRoundMatchList": function (intent, session, response) {
-        var outputText = '';
+    "GetALLGroupMatchList": function (intent, session, response) {
         getMatchList(function (jsonResponse) {
+            var outputText = '';
+            matchList = jsonResponse;
+            console.log(matchList);
+            outputText += "Getting Match List for all Groups. ";
+            outputText += speakMatchList(matchList);
+            console.log(outputText);
+
+
+            response.tellWithCard(outputText, "Match List Card", "Match List Card Stuff?");
+        }, 'ALLGROUPS');
+    },
+    "GetKnockoutRoundMatchList": function (intent, session, response) {
+        getMatchList(function (jsonResponse) {
+            var outputText = '';
             matchList = jsonResponse;
             var newMatchList = [];
             console.log(matchList);
             switch (intent.slots.rounds.value.toUpperCase()) {
                 case "QUARTER FINAL":
-                    outputText = "Getting Match List for the Quarter finals. ";
+                    outputText += "Getting Match List for the Quarter finals. ";
                     for (var i = 0; i < matchList.length; i++) {
                         if (matchList[i].name.substring(0,2) === "R1") {
                             newMatchList.push(matchList[i]);
@@ -96,7 +109,7 @@ ESportsReports.prototype.intentHandlers = {
                     }
                     break;
                 case "SEMI FINAL":
-                    outputText = "Getting Match List for the Semi finals. ";
+                    outputText += "Getting Match List for the Semi finals. ";
                     for (var i = 0; i < matchList.length; i++) {
                         if (matchList[i].name.substring(0,2) === "R2")  {
                             newMatchList.push(matchList[i]);
@@ -104,7 +117,7 @@ ESportsReports.prototype.intentHandlers = {
                     }
                     break;
                 case "FINAL":
-                    outputText = "Getting Match for the final. ";
+                    outputText += "Getting Match for the final. ";
                     for (var i = 0; i < matchList.length; i++) {
                         if (matchList[i].name.substring(0,2) === "R3")  {
                             newMatchList.push(matchList[i]);
@@ -120,11 +133,11 @@ ESportsReports.prototype.intentHandlers = {
 
     },
     "GetKnockoutList": function (intent, session, response) {
-        var outputText = '';
         getMatchList(function (jsonResponse) {
+            var outputText = '';
             matchList = jsonResponse;
             console.log(matchList);
-            outputText = "Getting Match List for all of the Knockout Stages. ";
+            outputText += "Getting Match List for all of the Knockout Stages. ";
             outputText += speakMatchList(matchList);
 
 
@@ -133,22 +146,30 @@ ESportsReports.prototype.intentHandlers = {
 
     },
     "GetNextMatch": function (intent, session, response) {
-        var outputText = '';
-
         //Begins looping through events in json response
         getMatchList(function (jsonResponse) {
+            var outputText = '';
+            outputText += "Getting next game to be played";
             outputText += speakNextGame(jsonResponse, true);
             response.tellWithCard(outputText, "Match List Card", "Match List Card Stuff?");
         }, "Get Next Match");
     },
     "GetLastMatch": function (intent, session, response) {
-        var outputText = '';
-
         //Begins looping through events in json response
         getMatchList(function (jsonResponse) {
+            var outputText = '';
+            outputText += "Getting last game that was played";
             outputText += speakNextGame(jsonResponse, false);
             response.tellWithCard(outputText, "Match List Card", "Match List Card Stuff?");
         }, "Get Next Match");
+    },
+    "GetTournamentList": function (intent, session, response) {
+        getFutureTournamentList(function (jsonResponse) {
+            var outputText = '';
+            outputText += 'Here is the list of future tournaments with a fixed date! ';
+            outputText += speakFutureTournamentList(jsonResponse);
+            response.tellWithCard(outputText, "Match List Card", "Match List Card Stuff?");
+        })
     },
     "AMAZON.HelpIntent": function (intent, session, response) {
         response.ask("You can say ask me about the League of Legends worlds schedule!", "You can say ask me about the League of Legends worlds schedule!");
@@ -276,6 +297,65 @@ function speakMatchList(jsonObject) {
     return outputText;
 }
 
+function speakFutureTournamentList(jsonResponse) {
+    var outputText = '';
+    var filteredData = jsonResponse.filter(function (d) {
+        if (d.start !== null)
+        {
+            var dt = new Date(d.start);
+            var curDate = new Date();
+            return dt > curDate;
+        }
+
+    });
+
+    for(var i = 0; i < filteredData.length; i++)
+    {
+        var dt = new Date(filteredData[i].start);
+        outputText += filteredData[i].name + ', organised on ' + dt.toISOString().replace(/T/, ' ').replace(/\..+/, '') + ', with a total prizepool of ';
+        if (filteredData[i].total_prizepool == 'TBD' || filteredData[i].total_prizepool === null)
+        {
+            outputText +=  ', not yet announced.';
+        }
+        else
+        {
+            outputText += filteredData[i].total_prizepool + ' dollars.';
+        }
+    }
+}
+
+function getFutureTournamentList(callback) {
+    var http = require('http');
+
+    var options = {
+        "method": "GET",
+        "hostname": "api.pandascore.co",
+        "port": null,
+        "path": "/all/v1/tournamentlist",
+        "headers": {
+            "authorization": "Bearer 112950-b3jkqCt49dzM85H0wslLA",
+            "cache-control": "no-cache",
+            "postman-token": "654d93a1-3c75-7097-d2a4-8d0af7623aec"
+        }
+    };
+
+
+    var req = http.request(options, function (res) {
+        var chunks = [];
+
+        res.on("data", function (chunk) {
+            chunks.push(chunk);
+        });
+
+        res.on("end", function () {
+            var body = Buffer.concat(chunks);
+            callback(JSON.parse(body.toString()));
+        });
+    });
+
+    req.end();
+}
+
 function getMatchList(callback, groups) {
     var http = require("http");
     var tournamentID;
@@ -327,5 +407,4 @@ function getMatchList(callback, groups) {
     });
 
     req.end();
-
 }
