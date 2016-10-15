@@ -116,7 +116,7 @@ ESportsReports.prototype.intentHandlers = {
         }, intent.slots.groups.value);
 
     },
-    "GetKnockoutMatchList": function (intent, session, response) {
+    "GetKnockoutList": function (intent, session, response) {
         var outputText = '';
         getMatchList(function (jsonResponse) {
             console.log(jsonResponse);
