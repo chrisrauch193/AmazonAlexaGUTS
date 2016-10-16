@@ -9,11 +9,11 @@ GetKnockoutList Knockout Games
 GetKnockoutList Knock Out Games
 GetKnockoutList Knockout List
 GetKnockoutList Knock Out List
-GetNextMatch Next
-GetNextMatch Tomorrow's
-GetNextMatch Tomorrow
-GetNextMatch Tonight's
-GetNextMatch Tonight
+GetNextMatch Next Game
+GetNextMatch Tomorrow's Game
+GetNextMatch Tomorrow Game
+GetNextMatch Tonight's Game
+GetNextMatch Tonight Game
 GetNextMatchFacts Summary Next
 GetNextMatchFacts Summary Tomorrows
 GetNextMatchFacts Summary Tomorrow
@@ -23,11 +23,11 @@ GetNextMatchFacts Tomorrow's Summary
 GetNextMatchFacts Tomorrow Summary
 GetNextMatchFacts Tonight's Summary
 GetNextMatchFacts Tonight Summary
-GetLastMatch Last
-GetLastMatch Yesterday's
-GetLastMatch Yesterday
-GetLastMatch Last Night's
-GetLastMatch Last Night
+GetLastMatch Last Game
+GetLastMatch Yesterday's Game
+GetLastMatch Yesterday Game
+GetLastMatch Last Night's Game
+GetLastMatch Last Night Game
 GetLastMatchFacts Summary Last
 GetLastMatchFacts Summary Yesterday's
 GetLastMatchFacts Summary Yesterday
