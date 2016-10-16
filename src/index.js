@@ -76,20 +76,6 @@ ESportsReports.prototype.intentHandlers = {
             response.tellWithCard(outputText, "Match List Card", "Match List Card Stuff?");
         }, intent.slots.groups.value);
     },
-    "GetAllGroupMatchList": function (intent, session, response) {
-        var outputText = '';
-        createGroupStageJSON();
-        outputText += "Getting Match List for all Groups. ";
-        outputText += JSON.stringify(currentMatch);
-        response.tellWithCard(outputText, "Match List Card", "Match List Card Stuff?");
-    },
-    "GetAllMatchList": function (intent, session, response) {
-        var outputText = '';
-        createWorldsJSON();
-        outputText += "Getting Match List for all Games in the tournament. ";
-        outputText += JSON.stringify(currentMatch);
-        response.tellWithCard(outputText, "Match List Card", "Match List Card Stuff?");
-    },
     "GetKnockoutRoundMatchList": function (intent, session, response) {
         getMatchList(function (jsonResponse) {
             var outputText = '';
@@ -113,6 +99,16 @@ ESportsReports.prototype.intentHandlers = {
             var outputText = '';
             outputText += "Getting next game to be played. ";
             outputText += speakNextGame(jsonResponse, true);
+            currentMatchList = jsonResponse;
+            console.log("-------------");
+            console.log("-------------");
+            console.log("-------------");
+            console.log("-------------");
+            console.log(currentMatch);
+            console.log("-------------");
+            console.log("-------------");
+            console.log("-------------");
+            console.log("-------------");
             response.tellWithCard(outputText, "Match List Card", "Match List Card Stuff?");
         }, "Get Next Match");
     },
@@ -147,22 +143,24 @@ exports.handler = function (event, context) {
 
 function createGroupStageJSON() {
     //creates a JSON object of all the group stage matches and assigns it to the global variable
-    currentMatch = '';
+    currentMatchList = '';
     var groupArray = ["A", "B", "C", "D"];
     for (var i = 0; i < 4; i++) {
         getMatchList(function (jsonResponse) {
-            currentMatch.push(jsonResponse)
+            console.log(jsonResponse);
+            currentMatchList.push(jsonResponse)
         }, groupArray[i]);
     }
 }
 
 function createWorldsJSON() {
     //creates a JSON object of all the tournament matches and assigns it to the global variable
-    currentMatch = '';
+    currentMatchList = '';
     var groupArray = ["A", "B", "C", "D", "KNOCKOUT"];
     for (var i = 0; i < 5; i++) {
         getMatchList(function (jsonResponse) {
-            currentMatch.push(jsonResponse)
+            console.log(jsonResponse);
+            currentMatchList.push(jsonResponse)
         }, groupArray[i]);
     }
 }
@@ -203,6 +201,7 @@ function speakNextGame(jsonObject, nextGame) {
     // Creates output text based on what is earliest event
 
     console.log(earliestEvent.start);
+    currentMatch = earliestEvent;
     earliestDate.setHours(earliestDate.getHours()+1);
     outputText += ('Next game is ' + earliestEvent.name + ' - starting on ' + earliestDate.toISOString().replace(/T/, ' ').replace(/\..+/, '') + ', with team(s) ');
     // Adds team names to event, if they exist
