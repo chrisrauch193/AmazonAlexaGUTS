@@ -125,38 +125,39 @@ ESportsReports.prototype.intentHandlers = {
                         var team1 = getTeamInitals(intent.slots.teamOne.value);
                         var team2 = getTeamInitals(intent.slots.teamTwo.value);
                         var matchName = team1 + "-vs-" + team2;
-                        console.log("--------------");
-                        console.log("--------------");
-                        console.log("--------------");
-                        console.log("--------------");
-                        console.log("--------------");
-                        console.log("--------------");
-                        console.log(matchName);
-                        console.log("--------------");
-                        console.log("--------------");
-                        console.log("--------------");
-                        console.log("--------------");
-                        console.log("--------------");
-                        console.log("--------------");
-
+                        var matchID = "";
                         if ((getMatchID(jsonResponse, matchName) != "")) {
-                            response.tellWithCard(getMatchID(jsonResponse, matchName), "Match List Card", "Match List Card Stuff?");
+                            matchID = getMatchID(jsonResponse, matchName);
                         }
                         else if ((getMatchID(jsonResponse1, matchName) != "")) {
-                            response.tellWithCard(getMatchID(jsonResponse1, matchName), "Match List Card", "Match List Card Stuff?");
+                            matchID = getMatchID(jsonResponse1, matchName);
                         }
                         else if ((getMatchID(jsonResponse2, matchName) != "")) {
-                            response.tellWithCard(getMatchID(jsonResponse2, matchName), "Match List Card", "Match List Card Stuff?");
+                            matchID = getMatchID(jsonResponse2, matchName);
                         }
                         else if ((getMatchID(jsonResponse3, matchName) != "")) {
-                            response.tellWithCard(getMatchID(jsonResponse3, matchName), "Match List Card", "Match List Card Stuff?");
+                            matchID = getMatchID(jsonResponse3, matchName);
                         }
+
+                        getMatchFromMatchID(function(jsonResponse4) {
+                            var outputText = '';
+                            outputText += 'Here are the details of the match: ';
+                            outputText += speakMatchDetails(jsonResponse4);
+                            response.tellWithCard(outputText, "Match Details Card", "Match Details Stuff?");
+                        }, matchID);
                     }, "D");
                 }, "C");
-                //response.tellWithCard("", "Match List Card", "Match List Card Stuff?")
             }, "B");
         }, "A");
-        //response.tellWithCard("", "Match List Card", "Match List Card Stuff?")
+    },
+    "GetMatchDetails": function (intent, session, response) {
+        var id = intent.slots.id.value;
+        getMatchFromMatchID(function (jsonResponse) {
+            var outputText = '';
+            outputText += 'Here are the details of the match: ';
+            outputText += speakMatchDetails(jsonResponse);
+            response.tellWithCard(outputText, "Match Details Card", "Match Details Stuff?");
+        }, id);
     },
     "AMAZON.HelpIntent": function (intent, session, response) {
         response.ask("You can say ask me about the League of Legends worlds schedule!", "You can say ask me about the League of Legends worlds schedule!");
@@ -529,4 +530,95 @@ function getTeamInitals(teamName) {
         case "INTZ E SPORTS":
             return "ITZ";
     }
+}
+
+function getMatchFromMatchID(callback, id) {
+    var http = require("http");
+
+    var options = {
+        "method": "GET",
+        "hostname": "api.pandascore.co",
+        "port": null,
+        "path": "/lol/v1/matches/" + id,
+        "headers": {
+            "authorization": "Bearer 112950-b3jkqCt49dzM85H0wslLA",
+            "cache-control": "no-cache",
+            "postman-token": "654d93a1-3c75-7097-d2a4-8d0af7623aec"
+        }
+    };
+
+    var req = http.request(options, function (res) {
+        var chunks = [];
+
+        res.on("data", function (chunk) {
+            chunks.push(chunk);
+        });
+
+        res.on("end", function () {
+            var body = Buffer.concat(chunks);
+            callback(JSON.parse(body.toString()));
+        });
+    });
+
+    req.end();
+}
+
+function speakMatchDetails(JSONData) {
+    var outputText = '';
+    // Retrieves team details
+    var JSONTeams = JSONData.teams;
+    var team1 = {id: JSONTeams[0].id, name: JSONTeams[0].name};
+    var team2 = {id: JSONTeams[1].id, name: JSONTeams[1].name};
+    // Begins rundown compilation
+    outputText += team1.name + ' versus ' + team2.name + '. ';
+    // Adds details for each game
+    var gameArray = JSONData.games;
+    for(var i = 0; i < gameArray.length; i++) {
+        outputText += 'In game '+(i+1)+', ';
+        outputText += concatGameDetails(gameArray[i], team1, team2);
+    }
+    return outputText;
+}
+
+function concatGameDetails(JSONGame, team1, team2) {
+    // first blood, tower, inhibitor, baron, dragon
+    // #of tower_kills, inhibitor_kills, baron_kills, dragon_kills
+    var outputText = '';
+    // Adds winner of game
+    if(JSONGame.winner_id === team1.id) {
+        outputText += 'Winner was '+team1.name+'. ';
+    } else {
+        outputText += 'Winner was '+team2.name+'. ';
+    }
+    // Adds first blood, tower, etc...
+    var gameTeamsArr = JSONGame.game_teams;
+    for(var i = 0; i < gameTeamsArr.length; i++) {
+        var teamStats = gameTeamsArr[i];
+        if(teamStats.team_id === team1.id) {
+            outputText += team1.name + ' got: ';
+        } else {
+            outputText += team2.name + ' got: ';
+        }
+        if (teamStats.first_blood) {
+            outputText += ' first blood, ';
+        }
+        if (teamStats.first_tower) {
+            outputText += ' first tower, ';
+        }
+        if (teamStats.first_inhibitor) {
+            outputText += ' first inhibitor, ';
+        }
+        if (teamStats.first_baron) {
+            outputText += ' first baron, ';
+        }
+        if (teamStats.first_dragon) {
+            outputText += ' first dragon, ';
+        }
+        outputText += teamStats.tower_kills + ' tower kills, ';
+        outputText += teamStats.inhibitor_kills + ' inhibitor kills, ';
+        outputText += teamStats.baron_kills + ' baron kills, ';
+        outputText += teamStats.dragon_kills + ' dragon kills, ';
+        outputText += teamStats.vilemaw_kills + ' vilemaw kills. ';
+    }
+    return outputText;
 }
