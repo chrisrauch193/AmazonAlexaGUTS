@@ -27,6 +27,13 @@
       "intent": "GetFutureTournamentList"
     },
     {
+      "intent": "GetMatchSelection",
+      "slots" : [{
+        "name" : "teams",
+        "type" : "LIST_OF_TEAMS"
+      }]
+    },
+    {
       "intent": "AMAZON.HelpIntent"
     }
   ]

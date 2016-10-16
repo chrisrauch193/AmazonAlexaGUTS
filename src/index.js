@@ -1,10 +1,7 @@
 /**
  Copyright 2014-2015 Amazon.com, Inc. or its affiliates. All Rights Reserved.
-
  Licensed under the Apache License, Version 2.0 (the "License"). You may not use this file except in compliance with the License. A copy of the License is located at
-
  http://aws.amazon.com/apache2.0/
-
  or in the "license" file accompanying this file. This file is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
  */
 
@@ -122,7 +119,7 @@ ESportsReports.prototype.intentHandlers = {
         }, "Get Next Match");
     },
     "GetFutureTournamentList": function (intent, session, response) {
-        getFutureTournamentList(function (jsonResponse) {
+        getTournamentList(function (jsonResponse) {
             var outputText = '';
             outputText += 'Here is the list of future tournaments with a fixed date! ';
             outputText += speakFutureTournamentList(jsonResponse);
@@ -173,6 +170,18 @@ function speakNextGame(jsonObject, nextGame) {
     var jsonResponse = jsonObject.filter(function (e) {
         return (e.start !== null & e.start != 'no start time');
     });
+    for (i = 0; i < jsonResponse.length; i++)
+    {
+        console.log(jsonResponse[i].start);
+
+        dt = new Date(jsonResponse[i].start);
+        dt.setHours(dt.getHours() +25);
+
+        console.log(dt);
+        jsonResponse[i].start = dt.toISOString().replace(/T/, ' ').replace(/\..+/, '');
+
+        console.log(jsonResponse[i].start);
+    }
     var earliestEvent;
     if (jsonResponse.length > 0)
     {
@@ -200,10 +209,19 @@ function speakNextGame(jsonObject, nextGame) {
     }
     // Creates output text based on what is earliest event
 
-    console.log(earliestEvent.start);
-    currentMatch = earliestEvent;
-    earliestDate.setHours(earliestDate.getHours()+1);
-    outputText += ('Next game is ' + earliestEvent.name + ' - starting on ' + earliestDate.toISOString().replace(/T/, ' ').replace(/\..+/, '') + ', with team(s) ');
+    if (nextGame)
+    {
+        outputText += ('Next game is ' + earliestEvent.name + ' - starting on ' + earliestDate.toISOString().replace(/T/, ' ').replace(/\..+/, '') + ', with team(s) ');
+    }
+    else
+    {
+        outputText += ('Last game was ' + earliestEvent.name + ' - started on ' + earliestDate.toISOString().replace(/T/, ' ').replace(/\..+/, '') + ', with team(s) ');
+    }
+
+
+
+
+
     // Adds team names to event, if they exist
     if (earliestEvent.teams.length == 0)
     {
@@ -343,7 +361,7 @@ function speakFutureTournamentList(jsonResponse) {
     return outputText;
 }
 
-function getFutureTournamentList(callback) {
+function getTournamentList(callback) {
     var http = require('http');
 
     var options = {
