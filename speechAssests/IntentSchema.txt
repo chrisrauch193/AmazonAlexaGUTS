@@ -45,6 +45,12 @@
       }]
     },
     {
+      "intent": "GetNextMatchFacts"
+    },
+    {
+      "intent": "GetLastMatchFacts"
+    },
+    {
       "intent": "AMAZON.HelpIntent"
     }
   ]
