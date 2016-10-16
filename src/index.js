@@ -97,15 +97,6 @@ ESportsReports.prototype.intentHandlers = {
             outputText += "Getting next game to be played. ";
             outputText += speakNextGame(jsonResponse, true);
             currentMatchList = jsonResponse;
-            console.log("-------------");
-            console.log("-------------");
-            console.log("-------------");
-            console.log("-------------");
-            console.log(currentMatch);
-            console.log("-------------");
-            console.log("-------------");
-            console.log("-------------");
-            console.log("-------------");
             response.tellWithCard(outputText, "Match List Card", "Match List Card Stuff?");
         }, "Get Next Match");
     },
@@ -125,6 +116,47 @@ ESportsReports.prototype.intentHandlers = {
             outputText += speakFutureTournamentList(jsonResponse);
             response.tellWithCard(outputText, "Match List Card", "Match List Card Stuff?");
         })
+    },
+    "GetMatchSelection": function (intent, session, response) {
+        getMatchList(function (jsonResponse) {
+            getMatchList(function (jsonResponse1) {
+                getMatchList(function (jsonResponse2) {
+                    getMatchList(function (jsonResponse3) {
+                        var team1 = getTeamInitals(intent.slots.teamOne.value);
+                        var team2 = getTeamInitals(intent.slots.teamTwo.value);
+                        var matchName = team1 + "-vs-" + team2;
+                        console.log("--------------");
+                        console.log("--------------");
+                        console.log("--------------");
+                        console.log("--------------");
+                        console.log("--------------");
+                        console.log("--------------");
+                        console.log(matchName);
+                        console.log("--------------");
+                        console.log("--------------");
+                        console.log("--------------");
+                        console.log("--------------");
+                        console.log("--------------");
+                        console.log("--------------");
+
+                        if ((getMatchID(jsonResponse, matchName) != "")) {
+                            response.tellWithCard(getMatchID(jsonResponse, matchName), "Match List Card", "Match List Card Stuff?");
+                        }
+                        else if ((getMatchID(jsonResponse1, matchName) != "")) {
+                            response.tellWithCard(getMatchID(jsonResponse1, matchName), "Match List Card", "Match List Card Stuff?");
+                        }
+                        else if ((getMatchID(jsonResponse2, matchName) != "")) {
+                            response.tellWithCard(getMatchID(jsonResponse2, matchName), "Match List Card", "Match List Card Stuff?");
+                        }
+                        else if ((getMatchID(jsonResponse3, matchName) != "")) {
+                            response.tellWithCard(getMatchID(jsonResponse3, matchName), "Match List Card", "Match List Card Stuff?");
+                        }
+                    }, "D");
+                }, "C");
+                //response.tellWithCard("", "Match List Card", "Match List Card Stuff?")
+            }, "B");
+        }, "A");
+        //response.tellWithCard("", "Match List Card", "Match List Card Stuff?")
     },
     "AMAZON.HelpIntent": function (intent, session, response) {
         response.ask("You can say ask me about the League of Legends worlds schedule!", "You can say ask me about the League of Legends worlds schedule!");
@@ -290,6 +322,7 @@ function speakKnockoutRoundMatchList(jsonResponse, round) {
 function speakMatchList(jsonObject) {
     var outputText = "";
     var jsonResponse = jsonObject;
+    console.log(JSON.stringify(jsonObject));
     for (var i = 0; i < jsonResponse.length; i++)
     {
         var dt = new Date(jsonResponse[i].start);
@@ -445,4 +478,55 @@ function getMatchList(callback, groups) {
     });
 
     req.end();
+}
+
+function getMatchID(jsonObject, matchName) {
+    var jsonResponse = jsonObject;
+    console.log(JSON.stringify(jsonResponse));
+    var match;
+    for (var i = 0; i < jsonResponse.length; i++) {
+        match = jsonResponse[i].name;
+        console.log(match);
+        if (match == matchName) {
+            return jsonResponse[i].id;
+        }
+    }
+    return "";
+}
+
+function getTeamInitals(teamName) {
+    switch (teamName.toUpperCase()) {
+        case "SPLYCE":
+            return "SPY"
+        case "TSM":
+            return "TSM";
+        case "ROYAL NEVER GIVE UP":
+            return "RNG";
+        case "SAMSUNG GALAXY":
+            return "SSG";
+        case "SK TELECOM T 1":
+            return "SKT";
+        case "FLASH WOLVES":
+            return "FW";
+        case "CLOUD 9":
+            return "C9";
+        case "I MAY":
+            return "IM";
+        case "ALBUS NOX LUNA":
+            return "ANX";
+        case "ROX TIGERS":
+            return "ROX";
+        case "G 2 ESPORTS":
+            return "G2";
+        case "COUNTER LOGIC GAMING":
+            return "CLG";
+        case "H 2 K":
+            return "H2K";
+        case "A H Q E SPORTS CLUB":
+            return "AHQ";
+        case "EDWARD GAMING":
+            return "EDG";
+        case "INTZ E SPORTS":
+            return "ITZ";
+    }
 }
