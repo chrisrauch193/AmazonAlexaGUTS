@@ -207,6 +207,7 @@ function speakNextGame(jsonObject, nextGame) {
             }
         }
     }
+    currentMatch = earliestEvent;
     // Creates output text based on what is earliest event
 
     if (nextGame)
