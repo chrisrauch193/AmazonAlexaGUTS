@@ -9,18 +9,35 @@ GetKnockoutList Knockout Games
 GetKnockoutList Knock Out Games
 GetKnockoutList Knockout List
 GetKnockoutList Knock Out List
-GetNextMatch Next Match
-GetNextMatch Next Game
-GetNextMatch Tomorrows Match
-GetNextMatch Tomorrows Game
-GetNextMatch Tonights Match
-GetNextMatch Tonights Game
-GetLastMatch Last Match
-GetLastMatch Last Game
-GetLastMatch Yesterdays Match
-GetLastMatch Yesterdays Game
-GetLastMatch Last Nights Match
-GetLastMatch Last Nights Game
+GetNextMatch Next
+GetNextMatch Tomorrow's
+GetNextMatch Tomorrow
+GetNextMatch Tonight's
+GetNextMatch Tonight
+GetNextMatchFacts Summary Next
+GetNextMatchFacts Summary Tomorrows
+GetNextMatchFacts Summary Tomorrow
+GetNextMatchFacts Summary Tonight's
+GetNextMatchFacts Summary Tonight
+GetNextMatchFacts Tomorrow's Summary
+GetNextMatchFacts Tomorrow Summary
+GetNextMatchFacts Tonight's Summary
+GetNextMatchFacts Tonight Summary
+GetLastMatch Last
+GetLastMatch Yesterday's
+GetLastMatch Yesterday
+GetLastMatch Last Night's
+GetLastMatch Last Night
+GetLastMatchFacts Summary Last
+GetLastMatchFacts Summary Yesterday's
+GetLastMatchFacts Summary Yesterday
+GetLastMatchFacts Summary Last Night's
+GetLastMatchFacts Summary Last Night
+GetLastMatchFacts Last Summary
+GetLastMatchFacts Yesterday's Summary
+GetLastMatchFacts Yesterday Summary
+GetLastMatchFacts Last Night's Summary
+GetLastMatchFacts Last Night Summary
 GetFutureTournamentList Upcoming Tournaments
 GetFutureTournamentList Upcoming Tournament
 GetFutureTournamentList Tournaments
@@ -30,3 +47,5 @@ GetFutureTournamentList Future Tournament
 GetMatchSelection {teamOne} versus {teamTwo}
 GetMatchSelection {teamOne} against {teamTwo}
 GetMatchSelection {teamOne} and {teamTwo}
+GetMatchDetails give me a rundown of match {id}
+GetMatchDetails tell me about match {id}
