@@ -4,17 +4,7 @@
  http://aws.amazon.com/apache2.0/
  or in the "license" file accompanying this file. This file is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
  */
-
-/**
- * This simple sample has no external dependencies or session management, and shows the most basic
- * example of how to create a Lambda function for handling Alexa Skill requests.
- *
- * Examples:
- * One-shot model:
- *  User: "Alexa, tell Hello World to say hello"
- *  Alexa: "Hello World!"
- */
-
+ 
 /**
  * App ID for the skill
  */
@@ -25,16 +15,11 @@ var APP_ID = undefined; //replace with "amzn1.echo-sdk-ams.app.[your-unique-valu
  */
 var AlexaSkill = require('./AlexaSkill');
 
-/**
- * HelloWorld is a child of AlexaSkill.
- * To read more about inheritance in JavaScript, see the link below.
- *
- * @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Introduction_to_Object-Oriented_JavaScript#Inheritance
- */
 var ESportsReports = function () {
     AlexaSkill.call(this, APP_ID);
 };
 
+// Global variables
 var currentMatchList;
 var currentMatch;
 
@@ -46,7 +31,6 @@ ESportsReports.prototype.constructor = ESportsReports;
 ESportsReports.prototype.eventHandlers.onSessionStarted = function (sessionStartedRequest, session) {
     console.log("ESportsReports onSessionStarted requestId: " + sessionStartedRequest.requestId
         + ", sessionId: " + session.sessionId);
-    // any initialization logic goes here
 };
 
 ESportsReports.prototype.eventHandlers.onLaunch = function (launchRequest, session, response) {
@@ -59,11 +43,10 @@ ESportsReports.prototype.eventHandlers.onLaunch = function (launchRequest, sessi
 ESportsReports.prototype.eventHandlers.onSessionEnded = function (sessionEndedRequest, session) {
     console.log("ESportsReports onSessionEnded requestId: " + sessionEndedRequest.requestId
         + ", sessionId: " + session.sessionId);
-    // any cleanup logic goes here
 };
 
 ESportsReports.prototype.intentHandlers = {
-    // register custom intent handlers
+    // Gets list of matches for a given group (A, B, C, D)
     "GetGroupMatchList": function (intent, session, response) {
         getMatchList(function (jsonResponse) {
             var outputText = '';
@@ -73,6 +56,7 @@ ESportsReports.prototype.intentHandlers = {
             response.tellWithCard(outputText, "Match List Card", "Match List Card Stuff?");
         }, intent.slots.groups.value);
     },
+    // Gets list of matches from a given knockout round
     "GetKnockoutRoundMatchList": function (intent, session, response) {
         getMatchList(function (jsonResponse) {
             var outputText = '';
@@ -80,6 +64,7 @@ ESportsReports.prototype.intentHandlers = {
             response.tellWithCard(outputText, "Match List Card", "Match List Card Stuff?");
         }, "KNOCKOUT");
     },
+    // Gets list of all matches from all knockout stages
     "GetKnockoutList": function (intent, session, response) {
         getMatchList(function (jsonResponse) {
             var outputText = '';
@@ -90,6 +75,7 @@ ESportsReports.prototype.intentHandlers = {
             response.tellWithCard(outputText, "Match List Card", "Match List Card Stuff?");
         }, "KNOCKOUT");
     },
+    // Tells user about the next match
     "GetNextMatch": function (intent, session, response) {
         //Begins looping through events in json response
         getMatchList(function (jsonResponse) {
@@ -100,6 +86,7 @@ ESportsReports.prototype.intentHandlers = {
             response.tellWithCard(outputText, "Match List Card", "Match List Card Stuff?");
         }, "Get Next Match");
     },
+    // Tells user about the most recent match
     "GetLastMatch": function (intent, session, response) {
         //Begins looping through events in json response
         getMatchList(function (jsonResponse) {
@@ -109,6 +96,7 @@ ESportsReports.prototype.intentHandlers = {
             response.tellWithCard(outputText, "Match List Card", "Match List Card Stuff?");
         }, "Get Next Match");
     },
+    // Gets a list of all announced tournaments with a definite date
     "GetFutureTournamentList": function (intent, session, response) {
         getTournamentList(function (jsonResponse) {
             var outputText = '';
@@ -117,11 +105,17 @@ ESportsReports.prototype.intentHandlers = {
             response.tellWithCard(outputText, "Match List Card", "Match List Card Stuff?");
         })
     },
+    // Gets the details of a match between two given teams
     "GetMatchSelection": function (intent, session, response) {
+        // Checks group A for game between teams
         getMatchList(function (jsonResponse) {
+            // B...
             getMatchList(function (jsonResponse1) {
+                // C...
                 getMatchList(function (jsonResponse2) {
+                    // D...
                     getMatchList(function (jsonResponse3) {
+                        // puts team names in format used by API
                         var team1 = getTeamInitals(intent.slots.teamOne.value);
                         var team2 = getTeamInitals(intent.slots.teamTwo.value);
                         var matchName = team1 + "-vs-" + team2;
@@ -150,6 +144,7 @@ ESportsReports.prototype.intentHandlers = {
             }, "B");
         }, "A");
     },
+    // Tells user details about a given match, retrieved using its unique id
     "GetMatchDetails": function (intent, session, response) {
         var id = intent.slots.id.value;
         getMatchFromMatchID(function (jsonResponse) {
@@ -158,6 +153,28 @@ ESportsReports.prototype.intentHandlers = {
             outputText += speakMatchDetails(jsonResponse);
             response.tellWithCard(outputText, "Match Details Card", "Match Details Stuff?");
         }, id);
+    },
+    "GetNextMatchFacts": function (intent, session, response) {
+        getMatchList(function (jsonResponse) {
+            var lastMatchID = getClosestMatchID(jsonResponse, true);
+            getMatchFromMatchID(function(jsonResponse4) {
+                var outputText = '';
+                outputText += 'Here are the details of the match: ';
+                outputText += speakMatchDetails(jsonResponse4);
+                response.tellWithCard(outputText, "Match Details Card", "Match Details Stuff?");
+            }, lastMatchID);
+        }, "Get Next Match");
+    },
+    "GetLastMatchFacts": function (intent, session, response) {
+        getMatchList(function (jsonResponse) {
+            var lastMatchID = getClosestMatchID(jsonResponse, false);
+            getMatchFromMatchID(function(jsonResponse4) {
+                var outputText = '';
+                outputText += 'Here are the details of the match: ';
+                outputText += speakMatchDetails(jsonResponse4);
+                response.tellWithCard(outputText, "Match Details Card", "Match Details Stuff?");
+            }, lastMatchID);
+        }, "Get Next Match");
     },
     "AMAZON.HelpIntent": function (intent, session, response) {
         response.ask("You can say ask me about the League of Legends worlds schedule!", "You can say ask me about the League of Legends worlds schedule!");
@@ -171,20 +188,19 @@ exports.handler = function (event, context) {
     eSportsReports.execute(event, context);
 };
 
+// Creates a JSON object of all the group stage matches and assigns it to the global variable
 function createGroupStageJSON() {
-    //creates a JSON object of all the group stage matches and assigns it to the global variable
     currentMatchList = '';
     var groupArray = ["A", "B", "C", "D"];
     for (var i = 0; i < 4; i++) {
         getMatchList(function (jsonResponse) {
-            console.log(jsonResponse);
             currentMatchList.push(jsonResponse)
         }, groupArray[i]);
     }
 }
 
+//creates a JSON object of all the tournament matches and assigns it to the global variable
 function createWorldsJSON() {
-    //creates a JSON object of all the tournament matches and assigns it to the global variable
     currentMatchList = '';
     var groupArray = ["A", "B", "C", "D", "KNOCKOUT"];
     for (var i = 0; i < 5; i++) {
@@ -195,6 +211,7 @@ function createWorldsJSON() {
     }
 }
 
+// Speaks next game to user, or most recent game if 'nextGame' is false
 function speakNextGame(jsonObject, nextGame) {
     // Earliest event initialised to first event in json list
     var outputText = '';
@@ -205,34 +222,35 @@ function speakNextGame(jsonObject, nextGame) {
     });
     for (i = 0; i < jsonResponse.length; i++)
     {
-        console.log(jsonResponse[i].start);
-
+        // Correcting for time zone issues (HARD CODED, COULD BE MORE ROBUST)
         dt = new Date(jsonResponse[i].start);
         dt.setHours(dt.getHours() +25);
-
-        console.log(dt);
+        // Changes api date format to something more approppriate for reading out
         jsonResponse[i].start = dt.toISOString().replace(/T/, ' ').replace(/\..+/, '');
-
-        console.log(jsonResponse[i].start);
     }
+    // earliest event declaration, acts as most recent event if nextGame is false
     var earliestEvent;
+    // Confirms list of event exists and if so, initialises earliest event 
     if (jsonResponse.length > 0)
     {
         earliestEvent = jsonResponse[0];
     }
     var earliestDate;
-    console.log(jsonObject);
+    
+    // Find most recent/find next event by max/min comparison of dates 
     for (var i = 1; i < jsonResponse.length; i++)
     {
         earliestDate = new Date(earliestEvent.start);
         var crtItemDate = new Date(jsonResponse[i].start);
-        var diff = Math.abs(currentDate - earliestDate);
+
         if (nextGame) {
             if (crtItemDate > currentDate && crtItemDate < earliestDate) {
                 earliestEvent = jsonResponse[i];
                 earliestDate = crtItemDate;
             }
         } else {
+            // date with smallest difference in time from today is most recent
+            var diff = Math.abs(currentDate - earliestDate);
             if ((Math.abs(currentDate - crtItemDate) < diff) && crtItemDate < currentDate)
             {
                 earliestEvent = jsonResponse[i];
@@ -241,8 +259,8 @@ function speakNextGame(jsonObject, nextGame) {
         }
     }
     currentMatch = earliestEvent;
+    
     // Creates output text based on what is earliest event
-
     if (nextGame)
     {
         outputText += ('Next game is ' + earliestEvent.name + ' - starting on ' + earliestDate.toISOString().replace(/T/, ' ').replace(/\..+/, '') + ', with team(s) ');
@@ -251,10 +269,6 @@ function speakNextGame(jsonObject, nextGame) {
     {
         outputText += ('Last game was ' + earliestEvent.name + ' - started on ' + earliestDate.toISOString().replace(/T/, ' ').replace(/\..+/, '') + ', with team(s) ');
     }
-
-
-
-
 
     // Adds team names to event, if they exist
     if (earliestEvent.teams.length == 0)
@@ -267,13 +281,12 @@ function speakNextGame(jsonObject, nextGame) {
             {
                 outputText += ', and ';
             }
-
             if (j !== 0 || (j == 0 && earliestEvent.teams.length == 1)) {
                 outputText += '. ';
             }
         }
     }
-
+    // Adds winner if there is one
     if (earliestEvent.winner_id !== null)
     {
         var winnerId = earliestEvent.winner_id;
@@ -285,6 +298,7 @@ function speakNextGame(jsonObject, nextGame) {
     return outputText;
 }
 
+// Gets user list of matches in a given knockout round
 function speakKnockoutRoundMatchList(jsonResponse, round) {
     var outputText = '';
     currentMatchList = jsonResponse;
@@ -320,6 +334,7 @@ function speakKnockoutRoundMatchList(jsonResponse, round) {
     return outputText;
 }
 
+// Gets user list of matches
 function speakMatchList(jsonObject) {
     var outputText = "";
     var jsonResponse = jsonObject;
@@ -368,8 +383,54 @@ function speakMatchList(jsonObject) {
     return outputText;
 }
 
+//Gets match id from either last or next game
+function getClosestMatchID(jsonObject, nextGame) {
+    // Earliest event initialised to first event in json list
+    //Current Date for comparison
+    var currentDate = Date.now();
+    var jsonResponse = jsonObject.filter(function (e) {
+        return (e.start !== null & e.start != 'no start time');
+    });
+    for (i = 0; i < jsonResponse.length; i++)
+    {
+        console.log(jsonResponse[i].start);
+        dt = new Date(jsonResponse[i].start);
+        dt.setHours(dt.getHours() +25);
+        console.log(dt);
+        jsonResponse[i].start = dt.toISOString().replace(/T/, ' ').replace(/\..+/, '');
+        console.log(jsonResponse[i].start);
+    }
+    var earliestEvent;
+    if (jsonResponse.length > 0)
+    {
+        earliestEvent = jsonResponse[0];
+    }
+    var earliestDate;
+    for (var i = 1; i < jsonResponse.length; i++)
+    {
+        earliestDate = new Date(earliestEvent.start);
+        var crtItemDate = new Date(jsonResponse[i].start);
+        var diff = Math.abs(currentDate - earliestDate);
+        if (nextGame) {
+            if (crtItemDate > currentDate && crtItemDate < earliestDate) {
+                earliestEvent = jsonResponse[i];
+                earliestDate = crtItemDate;
+            }
+        } else {
+            if ((Math.abs(currentDate - crtItemDate) < diff) && crtItemDate < currentDate)
+            {
+                earliestEvent = jsonResponse[i];
+                earliestDate = crtItemDate;
+            }
+        }
+    }
+    return earliestEvent.id;
+}
+
+// Gets user list of tournaments due to occur
 function speakFutureTournamentList(jsonResponse) {
     var outputText = '';
+    // removes any events that haven't had a date announced
     var filteredData = jsonResponse.filter(function (d) {
         if (d.start !== null)
         {
@@ -380,6 +441,7 @@ function speakFutureTournamentList(jsonResponse) {
 
     });
 
+    // Creates text output to describe tournaments
     for(var i = 0; i < filteredData.length; i++)
     {
         var dt = new Date(filteredData[i].start);
@@ -396,6 +458,7 @@ function speakFutureTournamentList(jsonResponse) {
     return outputText;
 }
 
+// API GET call for tournament list
 function getTournamentList(callback) {
     var http = require('http');
 
@@ -428,6 +491,7 @@ function getTournamentList(callback) {
     req.end();
 }
 
+// API Call for list of matches in a given group
 function getMatchList(callback, groups) {
     var http = require("http");
     var tournamentID;
@@ -498,36 +562,140 @@ function getMatchID(jsonObject, matchName) {
 function getTeamInitals(teamName) {
     switch (teamName.toUpperCase()) {
         case "SPLYCE":
-            return "SPY"
+            return "SPY";
+        case "SPLICE":
+            return "SPY";
+        case "SPLICED":
+            return "SPY";
+        case "LIGHTS":
+            return "SPY";
+        case "LIGHT":
+            return "SPY";
+        case "SPY":
+            return "SPY";
+        case "T S M":
+            return "TSM";
         case "TSM":
             return "TSM";
         case "ROYAL NEVER GIVE UP":
             return "RNG";
+        case "ROYAL":
+            return "RNG";
+        case "NEVER":
+            return "RNG";
+        case "GIVE":
+            return "RNG";
+        case "UP":
+            return "RNG";
+        case "RNG":
+            return "RNG";
         case "SAMSUNG GALAXY":
+            return "SSG";
+        case "SAMSUNG":
+            return "SSG";
+        case "GALAXY":
+            return "SSG";
+        case "SSG":
             return "SSG";
         case "SK TELECOM T 1":
             return "SKT";
+        case "SK":
+            return "SKT";
+        case "KT":
+            return "SKT";
+        case "T1":
+            return "SKT";
+        case "1":
+            return "SKT";
+        case "TELECOM":
+            return "SKT";
+        case "SKT":
+            return "SKT";
         case "FLASH WOLVES":
+            return "FW";
+        case "FLASH":
+            return "FW";
+        case "WOLVES":
+            return "FW";
+        case "FW":
             return "FW";
         case "CLOUD 9":
             return "C9";
+        case "CLOUD":
+            return "C9";
+        case "9":
+            return "C9";
+        case "C9":
+            return "C9";
         case "I MAY":
+            return "IM";
+        case "I":
+            return "IM";
+        case "EYE":
+            return "IM";
+        case "MAY":
+            return "IM";
+        case "IM":
             return "IM";
         case "ALBUS NOX LUNA":
             return "ANX";
+        case "ALBUS":
+            return "ANX";
+        case "NOX":
+            return "ANX";
+        case "LUNA":
+            return "ANX";
+        case "ANX":
+            return "ANX";
         case "ROX TIGERS":
             return "ROX";
+        case "ROX":
+            return "ROX";
+        case "TIGERS":
+            return "ROX";
+        case "G2 ESPORTS":
+            return "G2";
         case "G 2 ESPORTS":
+            return "G2";
+        case "G2":
             return "G2";
         case "COUNTER LOGIC GAMING":
             return "CLG";
+        case "COUNTER":
+            return "CLG";
+        case "LOGIC":
+            return "CLG";
+        case "CLG":
+            return "CLG";
         case "H 2 K":
+            return "H2K";
+        case "H TWO K":
+            return "H2K";
+        case "H2K":
             return "H2K";
         case "A H Q E SPORTS CLUB":
             return "AHQ";
+        case "A H Q E SPORTS CLUB":
+            return "AHQ";
+        case "AHQ E SPORTS CLUB":
+            return "AHQ";
+        case "CLUB":
+            return "AHQ";
+        case "AHQ":
+            return "AHQ";
         case "EDWARD GAMING":
             return "EDG";
+        case "EDWARD":
+            return "EDG";
+        case "EDG":
+            return "EDG";
         case "INTZ E SPORTS":
+            return "ITZ";
+        case "Ints":
+            return "ITZ";
+        case "Int":
+            return "ITZ";
+        case "ITZ":
             return "ITZ";
     }
 }
