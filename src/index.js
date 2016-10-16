@@ -121,7 +121,7 @@ ESportsReports.prototype.intentHandlers = {
             response.tellWithCard(outputText, "Match List Card", "Match List Card Stuff?");
         }, "Get Next Match");
     },
-    "GetTournamentList": function (intent, session, response) {
+    "GetFutureTournamentList": function (intent, session, response) {
         getFutureTournamentList(function (jsonResponse) {
             var outputText = '';
             outputText += 'Here is the list of future tournaments with a fixed date! ';

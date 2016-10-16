@@ -21,9 +21,9 @@ GetLastMatch Yesterdays Match
 GetLastMatch Yesterdays Game
 GetLastMatch Last Nights Match
 GetLastMatch Last Nights Game
-GetAllGroupMatchList Group Stage
-GetAllGroupMatchList All Group
-GetAllMatchList All
-GetAllMatchList Game
-GetAllMatchList Games
-GetAllMatchList Matches
+GetFutureTournamentList Upcoming Tournaments
+GetFutureTournamentList Upcoming Tournament
+GetFutureTournamentList Tournaments
+GetFutureTournamentList Tournament
+GetFutureTournamentList Future Tournaments
+GetFutureTournamentList Future Tournament

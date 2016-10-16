@@ -8,9 +8,6 @@
       }]
     },
     {
-      "intent": "GetAllGroupMatchList"
-    },
-    {
       "intent": "GetKnockoutRoundMatchList",
       "slots" : [{
         "name" : "rounds",
@@ -21,13 +18,13 @@
       "intent": "GetKnockoutList"
     },
     {
-      "intent": "GetAllMatchList"
-    },
-    {
       "intent": "GetLastMatch"
     },
     {
       "intent": "GetNextMatch"
+    },
+    {
+      "intent": "GetFutureTournamentList"
     },
     {
       "intent": "AMAZON.HelpIntent"
