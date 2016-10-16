@@ -1,0 +1,81 @@
+LIST_OF_GROUPS - 
+A
+B
+C
+D
+KNOCKOUT
+
+
+LIST_OF_ROUNDS-
+Quarter Final
+Semi Final
+Final
+
+LIST_OF_TEAMS-
+Splice
+Spliced
+Lights
+Light
+SPY
+T S M
+TSM
+Royal Never Give Up
+Royal
+Never
+Give
+Up
+RNG
+Samsung Galaxy
+Samsung
+Galaxy
+SSG
+SK Telecom T 1
+SK
+KT
+T1
+1
+Telecom
+SKT
+Flash Wolves
+Flash
+Wolves
+FW
+Cloud 9
+Cloud
+9
+C9
+I May
+I
+Eye
+May
+IM
+Albus NoX Luna
+Albus
+Nox
+Luna
+ANX
+ROX Tigers
+rox
+Tigers
+ROX
+G2 Esports
+G 2 Esports
+G2
+Counter Logic Gaming
+Counter
+Logic
+CLG
+H 2 K
+H TWO K
+H2K
+a h q e Sports Club
+ahq e Sports Club
+Club
+AHQ
+Edward Gaming
+Edward
+EDG
+INTZ e Sports
+Ints
+Int
+ITZ
