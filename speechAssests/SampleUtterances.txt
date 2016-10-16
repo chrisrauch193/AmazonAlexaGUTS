@@ -27,6 +27,6 @@ GetFutureTournamentList Tournaments
 GetFutureTournamentList Tournament
 GetFutureTournamentList Future Tournaments
 GetFutureTournamentList Future Tournament
-GetMatchSelection {teams} versus {teams}
-GetMatchSelection {teams} against {teams}
-GetMatchSelection {teams} and {teams}
+GetMatchSelection {teamOne} versus {teamTwo}
+GetMatchSelection {teamOne} against {teamTwo}
+GetMatchSelection {teamOne} and {teamTwo}

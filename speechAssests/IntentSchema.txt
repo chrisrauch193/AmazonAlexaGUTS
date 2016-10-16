@@ -11,7 +11,7 @@
       "intent": "GetKnockoutRoundMatchList",
       "slots" : [{
         "name" : "rounds",
-        "type" : "KNOCKOUT_ROUNDS"
+        "type" : "LIST_OF_ROUNDS"
       }]
     },
     {
@@ -27,9 +27,20 @@
       "intent": "GetFutureTournamentList"
     },
     {
+      "intent":"GetMatchDetails",
+      "slots" : [{
+        "name": "id",
+        "type": "NUMBER"
+      }]
+    },
+    {
       "intent": "GetMatchSelection",
       "slots" : [{
-        "name" : "teams",
+        "name" : "teamOne",
+        "type" : "LIST_OF_TEAMS"
+      },
+                 {
+        "name" : "teamTwo",
         "type" : "LIST_OF_TEAMS"
       }]
     },

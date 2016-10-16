@@ -1,2 +1,2 @@
-Name: Lol Worlds Update
-Invocation Name: about current worlds tournament
+Name: Panda
+Invocation Name: panda
