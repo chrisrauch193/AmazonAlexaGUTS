@@ -45,6 +45,7 @@ GetFutureTournamentList Tournament
 GetFutureTournamentList Future Tournaments
 GetFutureTournamentList Future Tournament
 GetMatchSelection {teamOne} versus {teamTwo}
+GetMatchSelection {teamOne} verses {teamTwo}
 GetMatchSelection {teamOne} against {teamTwo}
 GetMatchSelection {teamOne} and {teamTwo}
 GetMatchDetails give me a rundown of match {id}
